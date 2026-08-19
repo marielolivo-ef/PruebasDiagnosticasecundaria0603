@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pruebas Diagnósticas · Educación Física Secundaria</title>
+<meta name="description" content="Registro y panel de progreso de las pruebas diagnósticas de Educación Física, nivel secundario." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#14181C;
+    --ink-soft:#2A3138;
+    --paper:#F7F5F0;
+    --paper-raised:#FFFFFF;
+    --line:#E2DFD6;
+    --muted:#6B7280;
+    --court:#1D6E78;
+    --court-dark:#154F57;
+    --amber:#EFA23B;
+    --amber-dark:#C67F1F;
+    --alto:#2E7D5B;
+    --alto-bg:#E4F2EB;
+    --medio:#B4790A;
+    --medio-bg:#FCF0DA;
+    --bajo:#B4453B;
+    --bajo-bg:#FBE9E7;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(20,24,28,0.06), 0 4px 14px rgba(20,24,28,0.05);
+    --font-display:'Oswald', sans-serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:var(--font-display);
+    font-weight:600;
+    letter-spacing:0.01em;
+    color:var(--ink);
+    margin:0;
+  }
+  .mono{font-family:var(--font-mono);}
+  button{font-family:var(--font-body);cursor:pointer;}
+  input,select{font-family:var(--font-body);}
+  a{color:var(--court);}
+
+  /* -------- estructura general -------- */
+  #app{min-height:100vh;display:flex;flex-direction:column;}
+  .zigzag{
+    height:6px;
+    width:100%;
+    background-image:linear-gradient(135deg, var(--amber) 25%, transparent 25%),
+                      linear-gradient(225deg, var(--amber) 25%, transparent 25%),
+                      linear-gradient(45deg, var(--amber) 25%, transparent 25%),
+                      linear-gradient(315deg, var(--amber) 25%, transparent 25%);
+    background-position: 10px 0, 10px 0, 0 0, 0 0;
+    background-size: 20px 6px;
+    background-repeat: repeat-x;
+    opacity:0.9;
+  }
+
+  /* -------- pantalla de acceso -------- */
+  .login-wrap{
+    flex:1;display:flex;align-items:center;justify-content:center;
+    padding:24px;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(29,110,120,0.08), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(239,162,59,0.10), transparent 45%),
+      var(--paper);
+  }
+  .login-card{
+    width:100%;max-width:420px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:32px 28px;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--court);
+    margin-bottom:8px;
+  }
+  .login-card h1{font-size:26px;line-height:1.15;margin-bottom:6px;}
+  .login-card .sub{color:var(--muted);font-size:14px;margin-bottom:22px;}
+
+  .role-toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+  .role-toggle button{
+    flex:1;padding:10px 8px;border:none;background:var(--paper);
+    font-size:13.5px;font-weight:600;color:var(--muted);
+    transition:background .15s, color .15s;
+  }
+  .role-toggle button.active{background:var(--ink);color:#fff;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+  .field select, .field input{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+    font-size:15px;background:#fff;color:var(--ink);
+  }
+  .field input.mono{letter-spacing:0.12em;}
+  .field select:focus, .field input:focus{outline:2px solid var(--court);outline-offset:1px;}
+  .hint{font-size:12px;color:var(--muted);margin-top:5px;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 18px;border-radius:8px;border:1px solid transparent;
+    font-size:14.5px;font-weight:600;transition:transform .06s ease, filter .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--amber);color:#241705;}
+  .btn-primary:hover{filter:brightness(0.96);}
+  .btn-dark{background:var(--ink);color:#fff;}
+  .btn-dark:hover{filter:brightness(1.15);}
+  .btn-outline{background:transparent;border-color:var(--line);color:var(--ink);}
+  .btn-outline:hover{background:var(--paper);}
+  .btn-danger-text{background:transparent;color:var(--bajo);border-color:transparent;font-size:13px;padding:6px 10px;}
+  .btn-block{width:100%;}
+  .btn[disabled]{opacity:0.55;cursor:not-allowed;}
+
+  .msg{padding:10px 12px;border-radius:8px;font-size:13.5px;margin-top:14px;display:none;}
+  .msg.show{display:block;}
+  .msg-error{background:var(--bajo-bg);color:var(--bajo);}
+  .msg-ok{background:var(--alto-bg);color:var(--alto);}
+
+  /* -------- shell principal -------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 22px;background:var(--ink);color:#fff;flex-wrap:wrap;gap:10px;
+  }
+  .topbar .brand{display:flex;align-items:center;gap:12px;}
+  .topbar .brand .bars{display:flex;gap:3px;}
+  .topbar .brand .bars span{display:block;width:4px;background:var(--amber);border-radius:1px;}
+  .topbar .brand .bars span:nth-child(1){height:10px;}
+  .topbar .brand .bars span:nth-child(2){height:18px;}
+  .topbar .brand .bars span:nth-child(3){height:14px;}
+  .topbar .brand-text{font-family:var(--font-display);font-size:16px;letter-spacing:0.01em;}
+  .topbar .brand-text small{display:block;font-family:var(--font-mono);font-size:10.5px;color:#B8BFC6;letter-spacing:0.08em;text-transform:uppercase;}
+  .topbar .who{display:flex;align-items:center;gap:12px;}
+  .badge{
+    font-family:var(--font-mono);font-size:12px;padding:5px 10px;border-radius:20px;
+    background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.18);
+  }
+  .tabs{display:flex;gap:4px;padding:12px 22px 0;background:var(--paper);border-bottom:1px solid var(--line);}
+  .tab-btn{
+    padding:10px 16px;border:none;background:transparent;font-weight:600;font-size:14px;
+    color:var(--muted);border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--amber);}
+  main{flex:1;padding:24px 22px 60px;max-width:1180px;margin:0 auto;width:100%;}
+
+  /* -------- registrar -------- */
+  .panel-header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+  .panel-header h2{font-size:22px;}
+  .panel-header .sub{color:var(--muted);font-size:13.5px;margin-top:4px;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+
+  .table-wrap{overflow-x:auto;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);}
+  table.reg{border-collapse:collapse;width:100%;min-width:920px;}
+  table.reg thead th{
+    text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;
+    color:var(--muted);font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line);
+    background:#FAF9F6;position:sticky;top:0;
+  }
+  table.reg td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  table.reg tbody tr:last-child td{border-bottom:none;}
+  table.reg input[type=text]{width:100%;min-width:120px;padding:8px 9px;border:1px solid var(--line);border-radius:6px;font-size:13.5px;}
+  table.reg input.grado{min-width:64px;}
+  table.reg select.nivel{
+    width:100%;min-width:92px;padding:8px 6px;border:1px solid var(--line);border-radius:6px;
+    font-size:13px;font-weight:600;background:#fff;color:var(--muted);
+  }
+  select.nivel.v-alto{background:var(--alto-bg);color:var(--alto);border-color:transparent;}
+  select.nivel.v-medio{background:var(--medio-bg);color:var(--medio);border-color:transparent;}
+  select.nivel.v-bajo{background:var(--bajo-bg);color:var(--bajo);border-color:transparent;}
+  .rm-row{background:transparent;border:none;color:var(--muted);font-size:18px;line-height:1;padding:4px 8px;border-radius:6px;}
+  .rm-row:hover{background:var(--bajo-bg);color:var(--bajo);}
+
+  .editor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:4px;}
+  .editor-field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:4px;}
+  .editor-field select.nivel{width:100%;padding:8px 6px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-weight:600;background:#fff;color:var(--muted);}
+
+  .confirm-box{
+    margin-top:16px;padding:16px 18px;border-radius:var(--radius);background:var(--alto-bg);
+    border:1px solid rgba(46,125,91,0.25);display:none;
+  }
+  .confirm-box.show{display:block;}
+  .confirm-box h3{color:var(--alto);font-size:16px;margin-bottom:6px;}
+  .confirm-box p{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft);}
+  .confirm-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+  /* -------- panel de progreso -------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
+  .card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:16px;}
+  .card .label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);font-weight:600;}
+  .card .value{font-family:var(--font-display);font-size:30px;margin-top:4px;}
+  .card .value.alto{color:var(--alto);} .card .value.medio{color:var(--medio);} .card .value.bajo{color:var(--bajo);}
+
+  .grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;}
+  @media (max-width:860px){.grid-2{grid-template-columns:1fr;}}
+  .chart-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
+  .chart-card h3{font-size:15px;margin-bottom:10px;}
+  .chart-card .chart-holder{position:relative;height:300px;}
+
+  select.select-centro{padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;background:#fff;}
+
+  table.datos-tabla{width:100%;border-collapse:collapse;font-size:13px;}
+  table.datos-tabla th{text-align:left;padding:8px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--line);}
+  table.datos-tabla td{padding:7px 8px;border-bottom:1px solid var(--line);}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600;}
+  .pill.alto{background:var(--alto-bg);color:var(--alto);}
+  .pill.medio{background:var(--medio-bg);color:var(--medio);}
+  .pill.bajo{background:var(--bajo-bg);color:var(--bajo);}
+
+  .empty-state{padding:50px 20px;text-align:center;color:var(--muted);}
+  .empty-state .zig-icon{font-size:26px;margin-bottom:10px;}
+
+  .footer-note{color:var(--muted);font-size:12px;text-align:center;padding:18px;}
+
+  /* -------- comprobante imprimible -------- */
+  #comprobante{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #comprobante, #comprobante *{visibility:visible;}
+    #comprobante{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
+    #comprobante table{width:100%;border-collapse:collapse;font-size:12px;}
+    #comprobante th, #comprobante td{border:1px solid #999;padding:6px 8px;text-align:left;}
+    #comprobante h1{font-size:18px;font-family:Arial,sans-serif;}
+  }
+
+  @media (max-width:600px){
+    .topbar{padding:12px 14px;}
+    main{padding:18px 14px 50px;}
+    .login-card{padding:26px 20px;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="comprobante"></div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — edita esto según tu instalación
+   ============================================================ */
+
+// Pega aquí la URL de tu Web App de Google Apps Script (paso 5 de la guía).
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVGlKR9TJME_T4CXDQwd2eTmZvkJSFYSpftim9LbYiROST2UInx42ymIjWJoGJWtFk/exec";
+
+// Lista de centros que aparecen en el formulario de acceso.
+// Deben escribirse EXACTAMENTE igual que en la columna "Centro Educativo"
+// de la pestaña Config del Google Sheet.
+const CENTROS_EDUCATIVOS = [
+  "Politécnico Salesiano Santo Domingo Savio",
+  "Jarabacoa Cristhian School",
+  "Liceo Paso Bajito",
+  "Politécnico Santo Domingo Savio",
+  "Nuestra señora de la Altagracia",
+  "Centro educativo Manuel Ubaldo Gomez",
+  "Maximino Gutiérrez de la Cruz",
+  "Prof. Insolina María Cruz",
+  "Liceo Mario Nelson Galán Durán",
+  "Político María Auxiadora",
+  "Nieves Maria Valerio",
+  "Politécnico Luis Ernesto Gómez Uribe",
+  "Belarminio Ramirez",
+  "HATO VIEJO",
+  "Centro Educativo Rafael Abreu",
+  "Piedra Blanca Hatillo",
+  "Marina Batista y Don Bosco",
+  "Liceo Ana Lucia Solares",
+  "Angosto",
+  "Colegio Fuente de Agua Viva",
+  "Carlos Manuel Tiburcio Guzmán",
+  "Centro Educativo Hatillo",
+  "Corocito",
+  "Escuela Paso Bajito",
+  "Escuela Masipedro",
+  "Escuela La Pita",
+  "Domingo Ant Perz Ozuna",
+  "Eligia Violeta Tiburcio Guzmán",
+  "Rafael Almánzar",
+  "Liceo Buena Vista",
+];
+
+const PRUEBAS = [
+  { key: "velocidad",   label: "Velocidad (20 m)" },
+  { key: "flexibilidad",label: "Flexibilidad (Sit & Reach)" },
+  { key: "agilidad",    label: "Agilidad (Zig-Zag)" },
+  { key: "manejoPie",   label: "Manejo de balón (pie)" },
+  { key: "bote",        label: "Bote de balón" },
+  { key: "tiro",        label: "Tiro a canasta" },
+  { key: "chuteo",      label: "Chuteo a portería" },
+  { key: "toques",      label: "Toques de dedos" }
+];
+
+// Rubro de valoración (qué significa Alto/Medio/Bajo en cada prueba).
+// Fuente: tu archivo "Criterios de Evaluación". Las 3 líneas marcadas
+// "COMPLETAR" son las que faltaban en ese archivo o no pude reconstruir
+// con certeza — edítalas aquí cuando tengas el texto correcto.
+const CRITERIOS = {
+  velocidad:    { criterio: "Tiempo y ejecución",        bajo: "Tarda más de 8 seg, movimientos poco coordinados", medio: "6–8 seg, ejecución aceptable",              alto: "Menos de 6 seg, técnica adecuada" },
+  flexibilidad: { criterio: "Alcance hacia adelante",     bajo: "No llega a la punta de los pies",                  medio: "Llega a la punta de los pies",              alto: "Supera la punta de los pies (+5 cm)" },
+  agilidad:     { criterio: "Tiempo y control",           bajo: "Más de 12 seg, derriba conos",                     medio: "9–12 seg, 1–2 errores",                     alto: "Menos de 9 seg, fluido y sin errores" },
+  manejoPie:    { criterio: "COMPLETAR",                  bajo: "COMPLETAR",                                        medio: "COMPLETAR",                                 alto: "COMPLETAR" },
+  bote:         { criterio: "Dribleo con ambas manos",    bajo: "Pierde control, no cambia de mano",                medio: "Bote aceptable, cambia con dificultad",     alto: "Control seguro, cambia de mano bien" },
+  tiro:         { criterio: "Aciertos en 5 tiros",        bajo: "0–1 aciertos",                                     medio: "2–3 aciertos",                              alto: "4–5 aciertos" },
+  chuteo:       { criterio: "COMPLETAR",                  bajo: "0–1 aciertos",                                     medio: "2–3 aciertos",                              alto: "4–5 aciertos" },
+  toques:       { criterio: "Toques de dedos correctos",  bajo: "Menos de 5",                                       medio: "5–9 toques",                                alto: "10 o más" }
+};
+
+// Preguntas de autoevaluación del estudiante (misma escala Alto/Medio/Bajo).
+const AUTOEVAL = [
+  { key: "autoAgua",                 label: "Tomo agua regularmente" },
+  { key: "autoActividadFisica",      label: "Realizo actividades físicas" },
+  { key: "autoEventosEscolares",     label: "Participo en eventos escolares" },
+  { key: "autoAlimentacion",         label: "Cuido mi salud alimentándome bien" },
+  { key: "autoCooperativo",          label: "Soy una persona cooperativa" },
+  { key: "autoAutoestima",           label: "Mi autoestima" },
+  { key: "autoSociable",             label: "Soy una persona sociable" },
+  { key: "autoAprendizaje",          label: "Pongo de mi parte para el aprendizaje" }
+];
+
+const NIVEL_VALOR = { "Alto": 3, "Medio": 2, "Bajo": 1 };
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+const state = {
+  loginRol: "maestro", // "maestro" | "admin"
+  session: null,       // { rol, centro, pin, registradoPor }
+  loading: false,
+  activeTab: "registrar",
+  rowSeq: 0,
+  filas: [],           // filas de la tabla de registro
+  draftRestaurado: false,
+  registrarCentroAdmin: CENTROS_EDUCATIVOS[0] || "",
+  lastBatch: null,     // último lote guardado, para el comprobante
+  panel: { loading:false, error:null, registros:null, centroVisto:"__TODOS__" }
+};
+
+const app = document.getElementById("app");
+
+/* ============================================================
+   API
+   ============================================================ */
+async function api(action, payload) {
+  const body = Object.assign({ action }, payload || {});
+  const res = await fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // evita preflight CORS con Apps Script
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error("No se pudo conectar con el servidor (" + res.status + ")");
+  const data = await res.json();
+  return data;
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+function nuevaFila() {
+  state.rowSeq += 1;
+  const fila = { id: "f" + state.rowSeq, nombre: "", grado: "" };
+  PRUEBAS.forEach(p => fila[p.key] = "");
+  AUTOEVAL.forEach(a => fila[a.key] = "");
+  return fila;
+}
+function filasIniciales(n) {
+  state.filas = [];
+  for (let i = 0; i < n; i++) state.filas.push(nuevaFila());
+}
+
+/* ---------------- Borrador de registro (para no perder el trabajo) ---------------- */
+function claveBorrador(centro) {
+  return "borrador_registro_" + centro;
+}
+function guardarBorrador() {
+  const s = state.session;
+  if (!s) return;
+  const centro = s.rol === "admin" ? state.registrarCentroAdmin : s.centro;
+  if (!centro) return;
+  try {
+    localStorage.setItem(claveBorrador(centro), JSON.stringify(state.filas));
+  } catch (e) { /* almacenamiento no disponible: seguimos sin guardar borrador */ }
+}
+function cargarBorrador(centro) {
+  try {
+    const raw = localStorage.getItem(claveBorrador(centro));
+    if (!raw) return null;
+    const filas = JSON.parse(raw);
+    if (!Array.isArray(filas) || filas.length === 0) return null;
+    return filas;
+  } catch (e) { return null; }
+}
+function borrarBorrador(centro) {
+  try { localStorage.removeItem(claveBorrador(centro)); } catch (e) { /* nada que hacer */ }
+}
+function borradorTieneContenido(filas) {
+  return filas.some(f => f.nombre && f.nombre.trim() !== "");
+}
+// Decide si mostrar el borrador guardado o filas vacías para el centro activo
+// (el maestro tiene un solo centro fijo; el admin puede cambiar de centro en el selector).
+function cargarFilasParaCentroActivo() {
+  const s = state.session;
+  const centro = s.rol === "admin" ? state.registrarCentroAdmin : s.centro;
+  const borrador = centro ? cargarBorrador(centro) : null;
+  if (borrador && borradorTieneContenido(borrador)) {
+    state.filas = borrador;
+    let maxSeq = 0;
+    borrador.forEach(f => {
+      const m = /^f(\d+)$/.exec(f.id || "");
+      if (m) maxSeq = Math.max(maxSeq, parseInt(m[1], 10));
+    });
+    state.rowSeq = maxSeq;
+    state.draftRestaurado = true;
+  } else {
+    filasIniciales(5);
+    state.draftRestaurado = false;
+  }
+}
+function escapeHtml(str) {
+  return String(str == null ? "" : str).replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[s]));
+}
+function promedio(valores) {
+  if (!valores.length) return null;
+  return valores.reduce((a,b)=>a+b,0) / valores.length;
+}
+function nivelDeValor(v) {
+  if (v >= 2.5) return "alto";
+  if (v >= 1.5) return "medio";
+  return "bajo";
+}
+
+/* ============================================================
+   RENDER RAÍZ
+   ============================================================ */
+function render() {
+  if (!state.session) {
+    renderLogin();
+  } else {
+    renderShell();
+  }
+}
+
+/* ---------------- LOGIN ---------------- */
+function renderLogin() {
+  const esAdmin = state.loginRol === "admin";
+  app.innerHTML = `
+    <div class="zigzag"></div>
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="eyebrow">Educación Física · Nivel Secundario</div>
+        <h1>Pruebas Diagnósticas</h1>
+        <div class="sub">Registra los resultados de tu centro y consulta el progreso.</div>
+
+        <div class="role-toggle">
+          <button id="rolMaestroBtn" class="${!esAdmin ? "active" : ""}">Soy maestro/a</button>
+          <button id="rolAdminBtn" class="${esAdmin ? "active" : ""}">Administrador/a</button>
+        </div>
+
+        <form id="loginForm">
+          ${!esAdmin ? `
+            <div class="field">
+              <label for="centroSel">Centro educativo</label>
+              <select id="centroSel" required>
+                ${CENTROS_EDUCATIVOS.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label for="nombreMaestro">Tu nombre</label>
+              <input type="text" id="nombreMaestro" placeholder="Nombre del maestro/a" required />
+            </div>
+          ` : ``}
+          <div class="field">
+            <label for="pinInput">PIN (4 dígitos)</label>
+            <input type="password" inputmode="numeric" maxlength="4" class="mono" id="pinInput" placeholder="••••" required />
+            <div class="hint">${esAdmin ? "PIN de administrador definido en la pestaña Config." : "Pídelo a quien administra el sistema si no lo tienes."}</div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Entrar</button>
+          <div class="msg msg-error" id="loginMsg"></div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("rolMaestroBtn").onclick = () => { state.loginRol = "maestro"; renderLogin(); };
+  document.getElementById("rolAdminBtn").onclick = () => { state.loginRol = "admin"; renderLogin(); };
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById("loginMsg");
+    msg.classList.remove("show");
+    const pin = document.getElementById("pinInput").value.trim();
+    const centro = esAdmin ? null : document.getElementById("centroSel").value;
+    const registradoPor = esAdmin ? "Administrador" : document.getElementById("nombreMaestro").value.trim();
+
+    if (WEB_APP_URL.indexOf("PEGA_AQUI") === 0) {
+      msg.textContent = "Falta configurar WEB_APP_URL en este archivo (ver guía de instalación).";
+      msg.classList.add("show");
+      return;
+    }
+
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true; btn.textContent = "Entrando…";
+    try {
+      const resp = await api("login", { centro, pin });
+      if (resp.ok) {
+        state.session = { rol: resp.rol, centro: resp.centro, pin, registradoPor };
+        cargarFilasParaCentroActivo();
+        state.activeTab = "registrar";
+        render();
+      } else {
+        msg.textContent = resp.error || "No se pudo entrar.";
+        msg.classList.add("show");
+      }
+    } catch (err) {
+      msg.textContent = "Error de conexión: " + err.message;
+      msg.classList.add("show");
+    } finally {
+      btn.disabled = false; btn.textContent = "Entrar";
+    }
+  });
+}
+
+/* ---------------- SHELL ---------------- */
+function renderShell() {
+  const s = state.session;
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="brand">
+        <div class="bars"><span></span><span></span><span></span></div>
+        <div class="brand-text">Pruebas Diagnósticas<small>Educación Física · Secundaria</small></div>
+      </div>
+      <div class="who">
+        <span class="badge">${s.rol === "admin" ? "Administrador/a" : escapeHtml(s.centro)}</span>
+        <button class="btn btn-outline" id="logoutBtn" style="padding:7px 12px;font-size:13px;color:#fff;border-color:rgba(255,255,255,0.3);">Salir</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn ${state.activeTab==="registrar"?"active":""}" id="tabRegistrar">Registrar</button>
+      <button class="tab-btn ${state.activeTab==="panel"?"active":""}" id="tabPanel">Panel de progreso</button>
+    </div>
+    <main id="mainArea"></main>
+    <div class="footer-note">Sistema de registro de pruebas diagnósticas · los datos se guardan en Google Sheets.</div>
+  `;
+  document.getElementById("logoutBtn").onclick = () => {
+    state.session = null; state.panel = { loading:false, error:null, registros:null, centroVisto:"__TODOS__" };
+    render();
+  };
+  document.getElementById("tabRegistrar").onclick = () => { state.activeTab = "registrar"; renderShell(); };
+  document.getElementById("tabPanel").onclick = () => { state.activeTab = "panel"; renderShell(); loadPanel(); };
+
+  if (state.activeTab === "registrar") renderRegistrar();
+  else renderPanel();
+}
+
+/* ---------------- REGISTRAR ---------------- */
+function renderRegistrar() {
+  const main = document.getElementById("mainArea");
+  const s = state.session;
+  const esAdmin = s.rol === "admin";
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <div>
+        <h2>Registrar diagnóstico</h2>
+        <div class="sub">Carga los resultados de todo el grupo y guarda de una sola vez.</div>
+      </div>
+      ${esAdmin ? `
+        <div class="field" style="margin:0;min-width:240px;">
+          <label for="centroAdminSel">Centro a registrar</label>
+          <select id="centroAdminSel" class="select-centro">
+            ${CENTROS_EDUCATIVOS.map(c => `<option value="${escapeHtml(c)}" ${c===state.registrarCentroAdmin?"selected":""}>${escapeHtml(c)}</option>`).join("")}
+          </select>
+        </div>
+      ` : ""}
+    </div>
+
+    ${state.draftRestaurado ? `
+      <div class="msg msg-ok show" style="display:flex;justify-content:space-between;align-items:center;gap:12px;" id="borradorAviso">
+        <span>Recuperamos un registro sin guardar de tu sesión anterior en este centro. Puedes seguir donde lo dejaste.</span>
+        <button class="btn btn-outline" id="descartarBorradorBtn" style="padding:5px 10px;font-size:12px;white-space:nowrap;">Empezar de cero</button>
+      </div>
+    ` : ""}
+
+    <div class="toolbar">
+      <button class="btn btn-outline" id="addRowBtn">+ Agregar estudiante</button>
+      <button class="btn btn-outline" id="addFiveBtn">+ Agregar 5 filas</button>
+      <button class="btn btn-outline" id="verCriteriosBtn">Ver criterios de evaluación</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-primary" id="guardarBtn">Guardar registro</button>
+    </div>
+
+    <div class="table-wrap" id="criteriosWrap" style="display:none;margin-bottom:16px;">
+      <table class="datos-tabla" style="min-width:760px;">
+        <thead>
+          <tr><th>Prueba</th><th>Qué se mide</th><th>Bajo</th><th>Medio</th><th>Alto</th></tr>
+        </thead>
+        <tbody>
+          ${PRUEBAS.map(p => {
+            const c = CRITERIOS[p.key] || { criterio:"COMPLETAR", bajo:"COMPLETAR", medio:"COMPLETAR", alto:"COMPLETAR" };
+            return `<tr>
+              <td><strong>${p.label}</strong></td>
+              <td>${escapeHtml(c.criterio)}</td>
+              <td><span class="pill bajo">${escapeHtml(c.bajo)}</span></td>
+              <td><span class="pill medio">${escapeHtml(c.medio)}</span></td>
+              <td><span class="pill alto">${escapeHtml(c.alto)}</span></td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <table class="reg">
+        <thead>
+          <tr>
+            <th style="width:26px;" rowspan="2"></th>
+            <th style="min-width:150px;" rowspan="2">Estudiante</th>
+            <th style="width:70px;" rowspan="2">Grado</th>
+            <th colspan="${PRUEBAS.length}" style="text-align:center;border-left:2px solid var(--line);">Pruebas físicas</th>
+            <th colspan="${AUTOEVAL.length}" style="text-align:center;border-left:2px solid var(--line);color:var(--court);">Autoevaluación del estudiante</th>
+          </tr>
+          <tr>
+            ${PRUEBAS.map((p,i) => `<th${i===0?' style="border-left:2px solid var(--line);"':''}>${p.label}</th>`).join("")}
+            ${AUTOEVAL.map((a,i) => `<th${i===0?' style="border-left:2px solid var(--line);"':''}>${a.label}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody id="filasBody"></tbody>
+      </table>
+    </div>
+    <div class="msg msg-error" id="registrarMsg"></div>
+
+    <div class="confirm-box" id="confirmBox">
+      <h3>Registro guardado</h3>
+      <p id="confirmText"></p>
+      <div class="confirm-actions">
+        <button class="btn btn-dark" id="imprimirBtn">Descargar / imprimir comprobante</button>
+        <button class="btn btn-outline" id="otroGrupoBtn">Registrar otro grupo</button>
+      </div>
+    </div>
+  `;
+
+  if (esAdmin) {
+    document.getElementById("centroAdminSel").onchange = (e) => {
+      state.registrarCentroAdmin = e.target.value;
+      cargarFilasParaCentroActivo();
+      renderRegistrar();
+    };
+  }
+  document.getElementById("descartarBorradorBtn")?.addEventListener("click", () => {
+    const centro = esAdmin ? state.registrarCentroAdmin : s.centro;
+    borrarBorrador(centro);
+    filasIniciales(5);
+    state.draftRestaurado = false;
+    renderRegistrar();
+  });
+  document.getElementById("addRowBtn").onclick = () => { state.filas.push(nuevaFila()); renderFilas(); guardarBorrador(); };
+  document.getElementById("addFiveBtn").onclick = () => { for (let i=0;i<5;i++) state.filas.push(nuevaFila()); renderFilas(); guardarBorrador(); };
+  document.getElementById("verCriteriosBtn").onclick = () => {
+    const w = document.getElementById("criteriosWrap");
+    w.style.display = w.style.display === "none" ? "block" : "none";
+  };
+  document.getElementById("guardarBtn").onclick = guardarRegistro;
+  document.getElementById("imprimirBtn").onclick = imprimirComprobante;
+  document.getElementById("otroGrupoBtn").onclick = () => {
+    filasIniciales(5);
+    document.getElementById("confirmBox").classList.remove("show");
+    renderFilas();
+  };
+
+  renderFilas();
+}
+
+function renderFilas() {
+  const tbody = document.getElementById("filasBody");
+  if (!tbody) return;
+  const columnas = PRUEBAS.concat(AUTOEVAL);
+  tbody.innerHTML = state.filas.map(f => `
+    <tr data-id="${f.id}">
+      <td><button class="rm-row" data-action="rm" title="Quitar fila">×</button></td>
+      <td><input type="text" class="nombre" placeholder="Nombre del estudiante" value="${escapeHtml(f.nombre)}" /></td>
+      <td><input type="text" class="grado" placeholder="1ro A" value="${escapeHtml(f.grado)}" /></td>
+      ${PRUEBAS.map((p,i) => `
+        <td${i===0?' style="border-left:2px solid var(--line);"':''}>
+          <select class="nivel ${f[p.key] ? "v-"+f[p.key].toLowerCase() : ""}" data-key="${p.key}">
+            <option value="" ${!f[p.key]?"selected":""}>—</option>
+            <option value="Alto" ${f[p.key]==="Alto"?"selected":""}>Alto</option>
+            <option value="Medio" ${f[p.key]==="Medio"?"selected":""}>Medio</option>
+            <option value="Bajo" ${f[p.key]==="Bajo"?"selected":""}>Bajo</option>
+          </select>
+        </td>
+      `).join("")}
+      ${AUTOEVAL.map((a,i) => `
+        <td${i===0?' style="border-left:2px solid var(--line);"':''}>
+          <select class="nivel ${f[a.key] ? "v-"+f[a.key].toLowerCase() : ""}" data-key="${a.key}">
+            <option value="" ${!f[a.key]?"selected":""}>—</option>
+            <option value="Alto" ${f[a.key]==="Alto"?"selected":""}>Alto</option>
+            <option value="Medio" ${f[a.key]==="Medio"?"selected":""}>Medio</option>
+            <option value="Bajo" ${f[a.key]==="Bajo"?"selected":""}>Bajo</option>
+          </select>
+        </td>
+      `).join("")}
+    </tr>
+  `).join("");
+
+  tbody.querySelectorAll("tr").forEach(tr => {
+    const id = tr.getAttribute("data-id");
+    const fila = state.filas.find(f => f.id === id);
+
+    tr.querySelector(".nombre").addEventListener("input", e => { fila.nombre = e.target.value; guardarBorrador(); });
+    tr.querySelector(".grado").addEventListener("input", e => { fila.grado = e.target.value; guardarBorrador(); });
+    tr.querySelector("[data-action=rm]").addEventListener("click", () => {
+      state.filas = state.filas.filter(f => f.id !== id);
+      renderFilas();
+      guardarBorrador();
+    });
+    tr.querySelectorAll("select.nivel").forEach(sel => {
+      sel.addEventListener("change", e => {
+        const key = e.target.getAttribute("data-key");
+        fila[key] = e.target.value;
+        e.target.className = "nivel" + (e.target.value ? " v-" + e.target.value.toLowerCase() : "");
+        guardarBorrador();
+      });
+    });
+  });
+}
+
+async function guardarRegistro() {
+  const msg = document.getElementById("registrarMsg");
+  msg.classList.remove("show");
+
+  const filasConNombre = state.filas.filter(f => f.nombre.trim() !== "");
+  if (filasConNombre.length === 0) {
+    msg.textContent = "Agrega al menos un estudiante con nombre.";
+    msg.classList.add("show");
+    return;
+  }
+  const incompleta = filasConNombre.find(f => PRUEBAS.some(p => !f[p.key]));
+  if (incompleta) {
+    msg.textContent = `Falta calificar alguna prueba física para "${incompleta.nombre}". Completa Alto/Medio/Bajo en las 8 pruebas.`;
+    msg.classList.add("show");
+    return;
+  }
+  const autoevalIncompleta = filasConNombre.find(f => {
+    const algunaRespondida = AUTOEVAL.some(a => f[a.key]);
+    const todasRespondidas = AUTOEVAL.every(a => f[a.key]);
+    return algunaRespondida && !todasRespondidas;
+  });
+  if (autoevalIncompleta) {
+    msg.textContent = `La autoevaluación de "${autoevalIncompleta.nombre}" quedó a medias: complétala en las 8 preguntas o déjalas todas vacías.`;
+    msg.classList.add("show");
+    return;
+  }
+
+  const s = state.session;
+  const centro = s.rol === "admin" ? state.registrarCentroAdmin : s.centro;
+
+  const btn = document.getElementById("guardarBtn");
+  btn.disabled = true; btn.textContent = "Guardando…";
+  try {
+    const resp = await api("registrar", {
+      centro, pin: s.pin, registradoPor: s.registradoPor,
+      estudiantes: filasConNombre.map(f => {
+        const est = { nombre: f.nombre.trim(), grado: f.grado.trim() };
+        PRUEBAS.forEach(p => est[p.key] = f[p.key]);
+        AUTOEVAL.forEach(a => est[a.key] = f[a.key]);
+        return est;
+      })
+    });
+    if (resp.ok) {
+      state.lastBatch = { centro, registradoPor: s.registradoPor, fecha: new Date(), filas: filasConNombre };
+      borrarBorrador(centro);
+      state.draftRestaurado = false;
+      document.getElementById("confirmText").textContent =
+        `Se guardaron ${resp.count} estudiante(s) de "${centro}".`;
+      document.getElementById("confirmBox").classList.add("show");
+    } else {
+      msg.textContent = resp.error || "No se pudo guardar el registro.";
+      msg.classList.add("show");
+    }
+  } catch (err) {
+    msg.textContent = "Error de conexión: " + err.message;
+    msg.classList.add("show");
+  } finally {
+    btn.disabled = false; btn.textContent = "Guardar registro";
+  }
+}
+
+function imprimirComprobante() {
+  const b = state.lastBatch;
+  if (!b) return;
+  const comp = document.getElementById("comprobante");
+  comp.innerHTML = `
+    <h1>Comprobante de registro — Pruebas Diagnósticas</h1>
+    <p><strong>Centro educativo:</strong> ${escapeHtml(b.centro)}<br/>
+    <strong>Registrado por:</strong> ${escapeHtml(b.registradoPor)}<br/>
+    <strong>Fecha:</strong> ${b.fecha.toLocaleString("es-DO")}<br/>
+    <strong>Estudiantes registrados:</strong> ${b.filas.length}</p>
+    <table>
+      <thead><tr>
+        <th>Estudiante</th><th>Grado</th>
+        ${PRUEBAS.map(p => `<th>${p.label}</th>`).join("")}
+        ${AUTOEVAL.map(a => `<th>Autoeval: ${a.label}</th>`).join("")}
+      </tr></thead>
+      <tbody>
+        ${b.filas.map(f => `
+          <tr>
+            <td>${escapeHtml(f.nombre)}</td><td>${escapeHtml(f.grado)}</td>
+            ${PRUEBAS.map(p => `<td>${escapeHtml(f[p.key])}</td>`).join("")}
+            ${AUTOEVAL.map(a => `<td>${escapeHtml(f[a.key])}</td>`).join("")}
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+  window.print();
+}
+
+/* ---------------- PANEL DE PROGRESO ---------------- */
+async function loadPanel() {
+  const s = state.session;
+  state.panel.loading = true; state.panel.error = null;
+  renderPanelBody();
+  try {
+    const resp = await api("datos", { centro: s.centro, pin: s.pin });
+    if (resp.ok) {
+      state.panel.registros = resp.registros;
+    } else {
+      state.panel.error = resp.error || "No se pudieron cargar los datos.";
+    }
+  } catch (err) {
+    state.panel.error = "Error de conexión: " + err.message;
+  } finally {
+    state.panel.loading = false;
+    renderPanelBody();
+  }
+}
+
+function renderPanel() {
+  const main = document.getElementById("mainArea");
+  main.innerHTML = `
+    <div class="panel-header">
+      <div>
+        <h2>Panel de progreso</h2>
+        <div class="sub">${state.session.rol === "admin" ? "Vista global de todos los centros." : "Progreso de " + escapeHtml(state.session.centro) + "."}</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div id="centroFiltroWrap"></div>
+        <button class="btn btn-outline" id="refrescarBtn">Actualizar</button>
+        <button class="btn btn-outline" id="exportarBtn">Exportar CSV</button>
+      </div>
+    </div>
+    <div id="panelBody"></div>
+  `;
+  document.getElementById("refrescarBtn").onclick = loadPanel;
+  document.getElementById("exportarBtn").onclick = exportarCSV;
+  renderPanelBody();
+}
+
+function renderPanelBody() {
+  const body = document.getElementById("panelBody");
+  const filtroWrap = document.getElementById("centroFiltroWrap");
+  if (!body) return;
+
+  if (state.panel.loading) {
+    body.innerHTML = `<div class="empty-state">Cargando datos…</div>`;
+    if (filtroWrap) filtroWrap.innerHTML = "";
+    return;
+  }
+  if (state.panel.error) {
+    body.innerHTML = `<div class="msg msg-error show">${escapeHtml(state.panel.error)}</div>`;
+    if (filtroWrap) filtroWrap.innerHTML = "";
+    return;
+  }
+  const registros = state.panel.registros || [];
+  const esAdmin = state.session.rol === "admin";
+
+  // selector de centro (solo admin, con más de un centro presente)
+  const centrosPresentes = [...new Set(registros.map(r => r.centro))].sort();
+  if (filtroWrap) {
+    if (esAdmin && centrosPresentes.length > 0) {
+      filtroWrap.innerHTML = `
+        <select class="select-centro" id="centroFiltro">
+          <option value="__TODOS__" ${state.panel.centroVisto==="__TODOS__"?"selected":""}>Todos los centros</option>
+          ${centrosPresentes.map(c => `<option value="${escapeHtml(c)}" ${state.panel.centroVisto===c?"selected":""}>${escapeHtml(c)}</option>`).join("")}
+        </select>`;
+      document.getElementById("centroFiltro").onchange = (e) => {
+        state.panel.centroVisto = e.target.value; renderPanelBody();
+      };
+    } else {
+      filtroWrap.innerHTML = "";
+    }
+  }
+
+  if (registros.length === 0) {
+    body.innerHTML = `
+      <div class="empty-state">
+        <div class="zig-icon">〜</div>
+        Aún no hay registros para mostrar.<br/>
+        En cuanto se registre un grupo en "Registrar", el progreso aparecerá aquí.
+      </div>`;
+    return;
+  }
+
+  const verTodos = esAdmin && state.panel.centroVisto === "__TODOS__";
+  const centroActivo = esAdmin ? state.panel.centroVisto : state.session.centro;
+  const dataset = verTodos ? registros : registros.filter(r => r.centro === centroActivo);
+  state.panel.datasetActual = dataset;
+
+  if (verTodos) {
+    body.innerHTML = renderVistaGlobal(registros);
+    dibujarRadarGlobal(registros);
+    dibujarRadarAutoevalGlobal(registros);
+    dibujarRankingCentros(registros);
+  } else {
+    body.innerHTML = renderVistaCentro(dataset, centroActivo);
+    dibujarRadarCentro(dataset);
+    dibujarRadarAutoevalCentro(dataset);
+    bindZonaPeligro(centroActivo, dataset.length);
+    bindEditor(dataset);
+  }
+}
+
+function resumenDe(registros, items) {
+  items = items || PRUEBAS;
+  const valores = [];
+  const conteos = { Alto:0, Medio:0, Bajo:0 };
+  const porPrueba = {};
+  items.forEach(p => porPrueba[p.key] = []);
+
+  registros.forEach(r => {
+    items.forEach(p => {
+      const nivel = r[p.key];
+      const val = NIVEL_VALOR[nivel];
+      if (val) {
+        valores.push(val);
+        porPrueba[p.key].push(val);
+        conteos[nivel] = (conteos[nivel]||0) + 1;
+      }
+    });
+  });
+
+  const promedioPorPrueba = {};
+  items.forEach(p => promedioPorPrueba[p.key] = promedio(porPrueba[p.key]) || 0);
+
+  return {
+    totalEstudiantes: registros.length,
+    promedioGeneral: promedio(valores) || 0,
+    conteos,
+    promedioPorPrueba
+  };
+}
+
+function tarjetasHtml(res) {
+  const nivelGeneral = nivelDeValor(res.promedioGeneral);
+  return `
+    <div class="cards">
+      <div class="card"><div class="label">Estudiantes</div><div class="value">${res.totalEstudiantes}</div></div>
+      <div class="card"><div class="label">Promedio general</div><div class="value ${nivelGeneral}">${res.promedioGeneral.toFixed(2)} / 3</div></div>
+      <div class="card"><div class="label">Calificaciones Alto</div><div class="value alto">${res.conteos.Alto||0}</div></div>
+      <div class="card"><div class="label">Calificaciones Medio</div><div class="value medio">${res.conteos.Medio||0}</div></div>
+      <div class="card"><div class="label">Calificaciones Bajo</div><div class="value bajo">${res.conteos.Bajo||0}</div></div>
+    </div>
+  `;
+}
+
+/* ---------------- Zona de peligro: eliminar centro ---------------- */
+function bindZonaPeligro(centro, cantidad) {
+  const cont = document.getElementById("zonaPeligroBody");
+  if (!cont) return;
+
+  if (!centro || cantidad === 0) {
+    cont.innerHTML = `<div style="font-size:13px;color:var(--muted);">No hay registros que eliminar para este centro.</div>`;
+    return;
+  }
+
+  cont.innerHTML = `
+    <button class="btn btn-outline" id="btnEliminarCentro" style="border-color:var(--bajo);color:var(--bajo);">
+      Eliminar todos los registros de este centro (${cantidad})
+    </button>
+  `;
+
+  document.getElementById("btnEliminarCentro").onclick = () => {
+    cont.innerHTML = `
+      <div class="msg msg-error show" style="margin:0 0 10px;">
+        Vas a borrar <strong>${cantidad}</strong> registro(s) de "<strong>${escapeHtml(centro)}</strong>" de forma permanente.
+        Escribe el nombre exacto del centro para confirmar.
+      </div>
+      <input type="text" id="confirmCentroInput" placeholder="${escapeHtml(centro)}"
+        style="width:100%;margin-bottom:10px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;" />
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn" id="confirmEliminarBtn" style="background:var(--bajo);color:#fff;" disabled>Sí, eliminar permanentemente</button>
+        <button class="btn btn-outline" id="cancelEliminarBtn">Cancelar</button>
+      </div>
+      <div class="msg msg-error" id="eliminarMsg"></div>
+    `;
+
+    const input = document.getElementById("confirmCentroInput");
+    const confirmBtn = document.getElementById("confirmEliminarBtn");
+    input.addEventListener("input", () => {
+      confirmBtn.disabled = input.value.trim() !== centro;
+    });
+    document.getElementById("cancelEliminarBtn").onclick = () => bindZonaPeligro(centro, cantidad);
+
+    confirmBtn.onclick = async () => {
+      const msg = document.getElementById("eliminarMsg");
+      msg.classList.remove("show");
+      confirmBtn.disabled = true; confirmBtn.textContent = "Eliminando…";
+      try {
+        const s = state.session;
+        const resp = await api("eliminarCentro", { centro, pin: s.pin });
+        if (resp.ok) {
+          cont.innerHTML = `<div class="msg msg-ok show">Se eliminaron ${resp.eliminados} registro(s) de "${escapeHtml(centro)}".</div>`;
+          if (state.session.rol === "admin") state.panel.centroVisto = "__TODOS__";
+          setTimeout(loadPanel, 900);
+        } else {
+          msg.textContent = resp.error || "No se pudo eliminar.";
+          msg.classList.add("show");
+          confirmBtn.disabled = false; confirmBtn.textContent = "Sí, eliminar permanentemente";
+        }
+      } catch (err) {
+        msg.textContent = "Error de conexión: " + err.message;
+        msg.classList.add("show");
+        confirmBtn.disabled = false; confirmBtn.textContent = "Sí, eliminar permanentemente";
+      }
+    };
+  };
+}
+
+/* ---------------- Editar estudiante ---------------- */
+function bindEditor(dataset) {
+  document.querySelectorAll("[data-edit]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-edit");
+      const registro = dataset.find(r => r.idRegistro === id);
+      if (registro) abrirEditor(registro);
+      else {
+        const cont = document.getElementById("editorPanel");
+        if (cont) cont.innerHTML = `<div class="msg msg-error show">Este registro es de antes de activar la edición y no tiene identificador — bórralo y vuelve a cargarlo si necesitas corregirlo.</div>`;
+      }
+    });
+  });
+}
+
+function campoEditorHtml(item, registro) {
+  const val = registro[item.key] || "";
+  return `
+    <div class="editor-field">
+      <label>${item.label}</label>
+      <select id="edit_${item.key}" class="nivel ${val ? "v-"+val.toLowerCase() : ""}">
+        <option value="" ${!val?"selected":""}>—</option>
+        <option value="Alto" ${val==="Alto"?"selected":""}>Alto</option>
+        <option value="Medio" ${val==="Medio"?"selected":""}>Medio</option>
+        <option value="Bajo" ${val==="Bajo"?"selected":""}>Bajo</option>
+      </select>
+    </div>
+  `;
+}
+
+function abrirEditor(registro) {
+  const cont = document.getElementById("editorPanel");
+  if (!cont) return;
+  cont.innerHTML = `
+    <div class="chart-card" style="margin-top:18px;border-color:var(--court);">
+      <h3>Editar estudiante</h3>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <div class="field" style="margin:0;flex:1;min-width:200px;">
+          <label>Nombre</label>
+          <input type="text" id="editNombre" value="${escapeHtml(registro.nombre)}" />
+        </div>
+        <div class="field" style="margin:0;width:120px;">
+          <label>Grado</label>
+          <input type="text" id="editGrado" value="${escapeHtml(registro.grado)}" />
+        </div>
+      </div>
+      <div style="font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Pruebas físicas</div>
+      <div class="editor-grid">${PRUEBAS.map(p => campoEditorHtml(p, registro)).join("")}</div>
+      <div style="font-size:11.5px;font-weight:600;color:var(--court);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em;">Autoevaluación</div>
+      <div class="editor-grid">${AUTOEVAL.map(a => campoEditorHtml(a, registro)).join("")}</div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-primary" id="guardarEdicionBtn">Guardar cambios</button>
+        <button class="btn btn-outline" id="cancelarEdicionBtn">Cancelar</button>
+      </div>
+      <div class="msg msg-error" id="editorMsg"></div>
+    </div>
+  `;
+  cont.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  cont.querySelectorAll("select.nivel").forEach(sel => {
+    sel.addEventListener("change", e => {
+      e.target.className = "nivel" + (e.target.value ? " v-" + e.target.value.toLowerCase() : "");
+    });
+  });
+
+  document.getElementById("cancelarEdicionBtn").onclick = () => { cont.innerHTML = ""; };
+
+  document.getElementById("guardarEdicionBtn").onclick = async () => {
+    const msg = document.getElementById("editorMsg");
+    msg.classList.remove("show");
+
+    const nombre = document.getElementById("editNombre").value.trim();
+    const grado = document.getElementById("editGrado").value.trim();
+    if (!nombre) {
+      msg.textContent = "El nombre no puede quedar vacío.";
+      msg.classList.add("show");
+      return;
+    }
+
+    const datos = { nombre, grado };
+    let faltaPrueba = false;
+    PRUEBAS.forEach(p => {
+      const v = document.getElementById("edit_" + p.key).value;
+      if (!v) faltaPrueba = true;
+      datos[p.key] = v;
+    });
+    if (faltaPrueba) {
+      msg.textContent = "Completa Alto/Medio/Bajo en las 8 pruebas físicas.";
+      msg.classList.add("show");
+      return;
+    }
+
+    const autoRespondidas = [];
+    AUTOEVAL.forEach(a => {
+      const v = document.getElementById("edit_" + a.key).value;
+      datos[a.key] = v;
+      if (v) autoRespondidas.push(v);
+    });
+    if (autoRespondidas.length > 0 && autoRespondidas.length < AUTOEVAL.length) {
+      msg.textContent = "La autoevaluación debe quedar completa en las 8 preguntas o vacía por completo.";
+      msg.classList.add("show");
+      return;
+    }
+
+    const btn = document.getElementById("guardarEdicionBtn");
+    btn.disabled = true; btn.textContent = "Guardando…";
+    try {
+      const s = state.session;
+      const centroEnvio = s.rol === "admin" ? registro.centro : s.centro;
+      const resp = await api("editarEstudiante", { centro: centroEnvio, pin: s.pin, idRegistro: registro.idRegistro, datos });
+      if (resp.ok) {
+        cont.innerHTML = `<div class="msg msg-ok show">Cambios guardados.</div>`;
+        setTimeout(loadPanel, 700);
+      } else {
+        msg.textContent = resp.error || "No se pudo guardar la edición.";
+        msg.classList.add("show");
+        btn.disabled = false; btn.textContent = "Guardar cambios";
+      }
+    } catch (err) {
+      msg.textContent = "Error de conexión: " + err.message;
+      msg.classList.add("show");
+      btn.disabled = false; btn.textContent = "Guardar cambios";
+    }
+  };
+}
+
+function renderVistaCentro(registros, centro) {
+  const res = resumenDe(registros);
+  return `
+    ${tarjetasHtml(res)}
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>Perfil por prueba física</h3>
+        <div class="chart-holder"><canvas id="radarCentro"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Autoevaluación del estudiante</h3>
+        <div class="chart-holder"><canvas id="radarAutoevalCentro"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-top:18px;">
+      <h3>Estudiantes registrados</h3>
+      <div style="max-height:340px;overflow:auto;">
+        <table class="datos-tabla">
+          <thead><tr><th>Estudiante</th><th>Grado</th><th>Prueba física</th><th>Autoevaluación</th><th></th></tr></thead>
+          <tbody>
+            ${registros.map(r => {
+              const vals = PRUEBAS.map(p => NIVEL_VALOR[r[p.key]]).filter(Boolean);
+              const prom = promedio(vals) || 0;
+              const niv = nivelDeValor(prom);
+              const valsAuto = AUTOEVAL.map(a => NIVEL_VALOR[r[a.key]]).filter(Boolean);
+              const promAuto = promedio(valsAuto);
+              const celdaAuto = promAuto == null
+                ? `<span style="color:var(--muted);">—</span>`
+                : `<span class="pill ${nivelDeValor(promAuto)}">${promAuto.toFixed(1)}</span>`;
+              return `<tr><td>${escapeHtml(r.nombre)}</td><td>${escapeHtml(r.grado)}</td>
+                <td><span class="pill ${niv}">${prom.toFixed(1)}</span></td>
+                <td>${celdaAuto}</td>
+                <td><button class="btn btn-outline" style="padding:5px 10px;font-size:12px;" data-edit="${escapeHtml(r.idRegistro||"")}">Editar</button></td></tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="editorPanel"></div>
+    <div class="chart-card" style="margin-top:18px;border-color:rgba(180,69,59,0.3);">
+      <h3 style="color:var(--bajo);">Zona de peligro</h3>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">
+        Borra permanentemente los registros de "<strong>${escapeHtml(centro || "")}</strong>". Esta acción no se puede deshacer.
+      </p>
+      <div id="zonaPeligroBody"></div>
+    </div>
+  `;
+}
+
+function renderVistaGlobal(registros) {
+  const res = resumenDe(registros);
+  return `
+    ${tarjetasHtml(res)}
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>Perfil global por prueba física</h3>
+        <div class="chart-holder"><canvas id="radarGlobal"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Autoevaluación global</h3>
+        <div class="chart-holder"><canvas id="radarAutoevalGlobal"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-top:18px;">
+      <h3>Promedio por centro educativo</h3>
+      <div class="chart-holder"><canvas id="rankingCentros"></canvas></div>
+    </div>
+  `;
+}
+
+function chartColors() {
+  return { court: "#1D6E78", amber: "#EFA23B", grid: "#E2DFD6", text: "#6B7280" };
+}
+
+function dibujarRadarCentro(registros) {
+  const canvas = document.getElementById("radarCentro");
+  if (!canvas) return;
+  const res = resumenDe(registros, PRUEBAS);
+  const c = chartColors();
+  new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels: PRUEBAS.map(p => p.label),
+      datasets: [{
+        label: "Promedio (1-3)",
+        data: PRUEBAS.map(p => res.promedioPorPrueba[p.key]),
+        backgroundColor: "rgba(29,110,120,0.18)",
+        borderColor: c.court, borderWidth: 2,
+        pointBackgroundColor: c.court
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min:0, max:3, ticks:{ stepSize:1, backdropColor:"transparent" }, grid:{color:c.grid}, angleLines:{color:c.grid}, pointLabels:{font:{size:10.5}} } },
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+function dibujarRadarAutoevalCentro(registros) {
+  const canvas = document.getElementById("radarAutoevalCentro");
+  if (!canvas) return;
+  const res = resumenDe(registros, AUTOEVAL);
+  const c = chartColors();
+  new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels: AUTOEVAL.map(a => a.label),
+      datasets: [{
+        label: "Autoevaluación (1-3)",
+        data: AUTOEVAL.map(a => res.promedioPorPrueba[a.key]),
+        backgroundColor: "rgba(46,125,91,0.18)",
+        borderColor: "#2E7D5B", borderWidth: 2,
+        pointBackgroundColor: "#2E7D5B"
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min:0, max:3, ticks:{ stepSize:1, backdropColor:"transparent" }, grid:{color:c.grid}, angleLines:{color:c.grid}, pointLabels:{font:{size:9.5}} } },
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+function dibujarRadarGlobal(registros) {
+  const canvas = document.getElementById("radarGlobal");
+  if (!canvas) return;
+  const res = resumenDe(registros, PRUEBAS);
+  const c = chartColors();
+  new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels: PRUEBAS.map(p => p.label),
+      datasets: [{
+        label: "Promedio global (1-3)",
+        data: PRUEBAS.map(p => res.promedioPorPrueba[p.key]),
+        backgroundColor: "rgba(239,162,59,0.20)",
+        borderColor: c.amber, borderWidth: 2,
+        pointBackgroundColor: c.amber
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min:0, max:3, ticks:{ stepSize:1, backdropColor:"transparent" }, grid:{color:c.grid}, angleLines:{color:c.grid}, pointLabels:{font:{size:10.5}} } },
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+function dibujarRadarAutoevalGlobal(registros) {
+  const canvas = document.getElementById("radarAutoevalGlobal");
+  if (!canvas) return;
+  const res = resumenDe(registros, AUTOEVAL);
+  const c = chartColors();
+  new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels: AUTOEVAL.map(a => a.label),
+      datasets: [{
+        label: "Autoevaluación global (1-3)",
+        data: AUTOEVAL.map(a => res.promedioPorPrueba[a.key]),
+        backgroundColor: "rgba(46,125,91,0.18)",
+        borderColor: "#2E7D5B", borderWidth: 2,
+        pointBackgroundColor: "#2E7D5B"
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min:0, max:3, ticks:{ stepSize:1, backdropColor:"transparent" }, grid:{color:c.grid}, angleLines:{color:c.grid}, pointLabels:{font:{size:9.5}} } },
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+function dibujarRankingCentros(registros) {
+  const canvas = document.getElementById("rankingCentros");
+  if (!canvas) return;
+  const c = chartColors();
+  const porCentro = {};
+  registros.forEach(r => { (porCentro[r.centro] = porCentro[r.centro] || []).push(r); });
+  const filas = Object.keys(porCentro).map(centro => ({
+    centro, promedio: resumenDe(porCentro[centro]).promedioGeneral
+  })).sort((a,b) => a.promedio - b.promedio);
+
+  new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels: filas.map(f => f.centro),
+      datasets: [{
+        label: "Promedio general",
+        data: filas.map(f => f.promedio),
+        backgroundColor: c.court
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { min:0, max:3, grid:{color:c.grid} }, y: { grid:{display:false}, ticks:{font:{size:10.5}} } },
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+function exportarCSV() {
+  const registros = state.panel.datasetActual || state.panel.registros || [];
+  if (registros.length === 0) return;
+  const cols = ["timestamp","centro","nombre","grado", ...PRUEBAS.map(p=>p.key), ...AUTOEVAL.map(a=>a.key), "registradoPor"];
+  const header = ["Fecha","Centro","Estudiante","Grado", ...PRUEBAS.map(p=>p.label), ...AUTOEVAL.map(a=>"Autoeval: "+a.label), "Registrado por"];
+  const rows = registros.map(r => cols.map(c => `"${String(r[c]==null?"":r[c]).replace(/"/g,'""')}"`).join(","));
+  const csv = [header.join(","), ...rows].join("\n");
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "pruebas_diagnosticas.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   INICIO
+   ============================================================ */
+render();
+</script>
+</body>
+</html>
